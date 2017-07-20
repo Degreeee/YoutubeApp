@@ -28,6 +28,38 @@ namespace YouTubeApp
             Directory.CreateDirectory(folderPath);
         }
 
+        private void btnDownload_Click(object sender, EventArgs e)
+        {
+            // Disable the inputs
+            InputToggle(false);
+
+            // Get the string from the textbox
+            // TODO: Implement a method to get the ID from a URL
+            // TODO: Implement a method to insert a comma separated list of Ids
+            string youTubeId = txtId.Text;
+
+            // Check to see if there is an ID supplied
+            if (youTubeId == "")
+            {
+                MessageBox.Show("Please enter a YouTube ID.", "Enter a value", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                InputToggle(true);
+                return;
+            }
+
+            // Create a progress variable to help manage the progress bar
+            Progress<double> progress = new Progress<double>(p => UpdateProgressBar(p));
+
+            // Create a task for the downloader and the converter and run it asynchronous
+            Task downloaderTask = RunDownloader(youTubeId, rbAudio.Checked, progress);
+
+            // Wait for the task to finish before continuing - helps keep the UI thread in line with the task
+            downloaderTask.Wait();
+
+            // Show a success message and re-enable the inputs  
+            MessageBox.Show("The download has been completed.");
+            InputToggle(true);
+        }
+
         private static async Task RunDownloader(string youTubeId, bool justAudio, Progress<double> progress)
         {
             // Create YouTube Client
@@ -106,5 +138,6 @@ namespace YouTubeApp
             rbAudio.Enabled = toggle;
             rbVideo.Enabled = toggle;
         }
+
     }
 }
